@@ -62,7 +62,7 @@ def list_movies():
     return {row[0]: {"year": row[1], "rating": row[2], "poster":row[3]} for row in movies}
 
 
-def add_movie(title, rating, year, poster):
+def add_movie(title, year, rating, poster):
     """Add a new movie to the database."""
     query = "INSERT INTO movies (title, rating, year, poster_url) VALUES (:title, :rating, :year, :poster)"
     params = {"title": title,  "rating": rating, "year": year, "poster": poster}
