@@ -1,13 +1,5 @@
 from sqlalchemy import create_engine, text
 
-QUERY_CREATE_TABLE = ("""
-        CREATE TABLE IF NOT EXISTS movies (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT UNIQUE NOT NULL,
-            year INTEGER NOT NULL,
-            rating REAL NOT NULL
-        )
-    """)
 
 # Define the database URL
 DB_URL = "sqlite:///data/movies.db"
@@ -17,7 +9,7 @@ engine = create_engine(DB_URL, echo=True)
 
 
 def commit_query(query, params):
-    """uizu"""
+    """Execute query with parameters, does changes in table"""
     try:
         with engine.begin() as connection:
             connection.execute(text(query), params)
@@ -26,15 +18,29 @@ def commit_query(query, params):
         print(e)
 
 
-#Create the movies table if it does not exist.
-commit_query(QUERY_CREATE_TABLE, params=None)
+def delete_table():
+    """Delete movies table"""
+    query = ("DROP TABLE IF EXISTS movies")
+    commit_query(query, params=None)
+
+def create_table():
+    """Create the movies table if it does not exist."""
+    query = ("""
+            CREATE TABLE movies (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title TEXT UNIQUE NOT NULL,
+                year INTEGER NOT NULL,
+                rating REAL NOT NULL,
+                poster_url TEXT
+            )
+        """)
+    commit_query(query, params=None)
 
 
 def execute_query(query, params=None):
     """
     Execute an SQL query with the params provided in a dictionary,
     and returns a list of records
-
     """
     try:
         with engine.connect() as conn:
@@ -51,16 +57,15 @@ def execute_query(query, params=None):
 
 def list_movies():
     """Retrieve all movies from the database."""
-    query = "SELECT title, year, rating FROM movies"
+    query = "SELECT title, year, rating, poster_url FROM movies"
     movies = execute_query(query)
+    return {row[0]: {"year": row[1], "rating": row[2], "poster":row[3]} for row in movies}
 
-    return {row[0]: {"year": row[1], "rating": row[2]} for row in movies}
 
-
-def add_movie(title, year, rating, country):
+def add_movie(title, rating, year, poster):
     """Add a new movie to the database."""
-    query = "INSERT INTO movies (title, year, rating, country) VALUES (:title, :year, :rating, :country)"
-    params = {"title": title, "year": year, "rating": rating, "country": country}
+    query = "INSERT INTO movies (title, rating, year, poster_url) VALUES (:title, :rating, :year, :poster)"
+    params = {"title": title,  "rating": rating, "year": year, "poster": poster}
     commit_query(query, params)
 
 
@@ -79,3 +84,4 @@ def update_movie(title, rating):
         "rating": rating
     }
     commit_query(query, params)
+

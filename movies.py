@@ -1,9 +1,12 @@
 import statistics
 from statistics import median
 import random
-#import matplotlib.pyplot as plt
+from urllib3 import HTTPConnectionPool
+import matplotlib.pyplot as plt
 import movie_storage_sql
 import sys
+from api_fetcher import fetch_data
+
 
 def show_menu():
     """Print all menu."""
@@ -21,11 +24,10 @@ def show_menu():
     print(menu)
 
 
-def choice_menu()->int:
+def choice_menu()->str:
     """Get user data, return data integer."""
     menu_num =input('\nEnter Choice (0-9): ')
     return menu_num
-    print("Please enter the corret number")
 
 
 def exit_program(movies_list):
@@ -35,7 +37,7 @@ def exit_program(movies_list):
 
 
 def show_movie_list(movies_list):
-    """Print all movies info."""
+    """Print all movies' info."""
     for movie, rate_year in movies_list.items():
         print(f'{movie}, {rate_year["rating"]}, {rate_year["year"]}')
 
@@ -45,15 +47,29 @@ def add_movie(movies_list):
     while True:
         movie_name = (input('Enter movie name: ')).lower()
         if movie_name.title() not in movies_list:
-            movie_rate = float(input('Enter movie rating: '))
-            if  1 < movie_rate < 10:
-                movie_year = int(input("Enter movie's year: "))
-                movie_country = input("Enter movie's country:")
-                movie_storage_sql.add_movie(movie_name.title(), movie_year, movie_rate, movie_country)
-                print(f'your movie {movie_name} added successfully')
+            try:
+                movie_name, movie_rate,movie_year, movie_poster = fetch_data(movie_name)
+                if all([movie_name, movie_rate,movie_year, movie_poster]):
+                    print(f'the movie:{movie_name} rating:{movie_rate} {movie_year} {movie_poster} found')
+                    user_answer = input('Do you want to save it on database:').strip().lower()
+                    if user_answer == 'y':
+                        try:
+                            movie_storage_sql.add_movie(movie_name.title(), movie_year, movie_rate, movie_poster)
+                            print(f'your movie {movie_name} added successfully')
+                        except Exception as e:
+                            print("Error adding movie", e)
+                    return
+                else:
+                    print(f"Movie {movie_name} was not found!")
+            except TypeError as e:
+                print(e)
+                return
+            except HTTPConnectionPool as e:
+                print(e)
                 return
         else:
             print(f"Movie {movie_name} already exist!")
+
 
 def delete_movie(movies_list):
     """Get data from user, delete movie, print confirmation."""
@@ -144,9 +160,11 @@ def search_movie(movies_list):
         if user_input.title() in movie:
             print(f'{movie.title()}, {movies_list[movie]["rating"]}, {movies_list[movie]["year"]} ')
 
+
 def get_value(movie):
     """This is only for sorted function key."""
     return movie[1]["rating"]
+
 
 def sort_movie_by_rating(movies_list):
     """Make new sorted list, print info."""
@@ -163,6 +181,7 @@ def show_histogram(movies_list):
     plt.hist(rating_list)
     plt.show()
 
+
 def validate_enter():
     """Validate if enter key is pressed"""
     while True:
@@ -171,6 +190,7 @@ def validate_enter():
             return True
         else:
             print("")
+
 
 def control_menu(number_selected, list_of_movies):
     """Select function base on th menu that user has selected."""
@@ -181,11 +201,13 @@ def control_menu(number_selected, list_of_movies):
         if menu_number == number_selected:
             menu(list_of_movies)
 
+
 def main():
     print('********** My Movies Database **********')
     condition = True
     while condition:
         movies = movie_storage_sql.list_movies()
+        print("all_movies:", movies)
         show_menu()
         try:
             menu_number = int(choice_menu())
