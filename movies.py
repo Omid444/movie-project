@@ -3,7 +3,7 @@ from statistics import median
 import random
 #import matplotlib.pyplot as plt
 import movie_storage_sql
-
+import sys
 
 def show_menu():
     """Print all menu."""
@@ -31,7 +31,7 @@ def choice_menu()->int:
 def exit_program(movies_list):
     """Print 'Bye' for user and exit program."""
     print('Bye')
-    exit()
+    sys.exit()
 
 
 def show_movie_list(movies_list):
@@ -189,7 +189,7 @@ def main():
         show_menu()
         try:
             menu_number = int(choice_menu())
-            if isinstance(menu_number, int) and 0 < menu_number <10:
+            if isinstance(menu_number, int) and 0 <= menu_number <10:
                 control_menu(menu_number, movies)
                 condition = validate_enter()
             else:
