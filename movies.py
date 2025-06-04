@@ -32,7 +32,7 @@ def choice_menu()->str:
 
 def exit_program(movies_list):
     """Print 'Bye' for user and exit program."""
-    print('Bye')
+    print('Program closed')
     sys.exit()
 
 
@@ -51,7 +51,7 @@ def add_movie(movies_list):
                 movie_name, movie_rate,movie_year, movie_poster = fetch_data(movie_name)
                 if all([movie_name, movie_rate,movie_year, movie_poster]):
                     print(f'the movie:{movie_name} rating:{movie_rate} {movie_year} {movie_poster} found')
-                    user_answer = input('Do you want to save it on database:').strip().lower()
+                    user_answer = input('Do you want to save it on database(y/n):').strip().lower()
                     if user_answer == 'y':
                         try:
                             movie_storage_sql.add_movie(movie_name.title(), movie_year, movie_rate, movie_poster)
@@ -207,7 +207,6 @@ def main():
     condition = True
     while condition:
         movies = movie_storage_sql.list_movies()
-        print("all_movies:", movies)
         show_menu()
         try:
             menu_number = int(choice_menu())
