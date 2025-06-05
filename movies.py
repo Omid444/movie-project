@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import movie_storage_sql
 import sys
 from api_fetcher import fetch_data
+import movie_web_generator
 
 
 def show_menu():
@@ -20,7 +21,8 @@ def show_menu():
 6. Random movie
 7. Search movie
 8. Movies sorted by rating
-9. Create Rating Histogram'''
+9. Create Rating Histogram
+10.Generate website'''
     print(menu)
 
 
@@ -182,6 +184,20 @@ def show_histogram(movies_list):
     plt.show()
 
 
+def generate_website(movies_list):
+    try:
+        movies = movie_storage_sql.list_movies()
+    except Exception as e:
+        print('Error in connection or fetching data from database')
+        print(e)
+    try:
+        movie_web_generator.gen_web(movies)
+        print('Website was generated successfully')
+    except Exception as e:
+        print(e)
+
+
+
 def validate_enter():
     """Validate if enter key is pressed"""
     while True:
@@ -196,30 +212,10 @@ def control_menu(number_selected, list_of_movies):
     """Select function base on th menu that user has selected."""
     menu_dict = {0:exit_program,1:show_movie_list,2:add_movie, 3:delete_movie, 4:update_movie,
                  5:show_stats, 6:show_random_movie, 7:search_movie, 8:sort_movie_by_rating,
-                 9:show_histogram}
+                 9:show_histogram, 10:generate_website}
     for menu_number, menu in menu_dict.items():
         if menu_number == number_selected:
             menu(list_of_movies)
 
 
-def main():
-    print('********** My Movies Database **********')
-    condition = True
-    while condition:
-        movies = movie_storage_sql.list_movies()
-        show_menu()
-        try:
-            menu_number = int(choice_menu())
-            if isinstance(menu_number, int) and 0 <= menu_number <10:
-                control_menu(menu_number, movies)
-                condition = validate_enter()
-            else:
-                print("Please enter a correct number")
-                condition = validate_enter()
-        except ValueError:
-            print("Please enter a correct number")
-            condition = validate_enter()
 
-
-if __name__ == "__main__":
-    main()
