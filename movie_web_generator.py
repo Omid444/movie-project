@@ -1,12 +1,8 @@
-from bs4 import BeautifulSoup
-
 
 HEADER = 'My Movie App'
 
 def serialize_animal(movies_list):
     """This function support dict from data fetcher to make suitable text"""
-    print(movies_list)
-    print(type(movies_list))
     movie_text = ''
     body_text = ''
     header_text = '<div class="list-movies-title">'\
@@ -31,14 +27,8 @@ def read_html(file_path, header, body):
     """Read html file and return needed content"""
     with open(file_path, "r", encoding="utf-8") as html_file:
         index = html_file.read()
-        soup = BeautifulSoup(index, 'html.parser')
-        target_header = soup.find('div', class_="list-movies-title")
-        target_body = soup.find('ol', class_="movie-grid")
-        print(target_header.text)
-        print(target_body.text)
         content_file = index.replace("__TEMPLATE_TITLE__", header)
         content_file = content_file.replace("__TEMPLATE_MOVIE_GRID__", body)
-        print(content_file)
         return content_file
 
 

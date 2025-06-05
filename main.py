@@ -6,7 +6,6 @@ def main():
     condition = True
     while condition:
         movies = movie_storage_sql.list_movies()
-        print(movies)
         mv.show_menu()
         try:
             menu_number = int(mv.choice_menu())
